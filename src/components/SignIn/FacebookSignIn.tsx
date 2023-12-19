@@ -10,13 +10,12 @@ import { useNavigate } from "react-router-dom";
 
 export default function FacebookSignIn({
   setIsLoading,
+  setMessage,
 }: React.SetStateAction<any>) {
   const navigate = useNavigate();
-  const onSuccess = async (res: SuccessResponse) => {
-  };
+  const onSuccess = async (res: SuccessResponse) => {};
 
-  const onFail = (err: FailResponse) => {
-  };
+  const onFail = (err: FailResponse) => {};
 
   const onProfileSuccess = async (res: ProfileSuccessResponse) => {
     const { email } = res;
@@ -29,13 +28,16 @@ export default function FacebookSignIn({
         body: JSON.stringify(body),
       }
     );
-
+    setIsLoading(false);
     if (response.ok) {
       const responseBody = await response.json();
       const { access_token } = responseBody;
       const cookies = new Cookies(null, { path: "/" });
       cookies.set("access_token", access_token, { path: "/" });
       navigate("/");
+    } else {
+      const { message } = await response.json();
+      setMessage(message);
     }
   };
 

@@ -82,8 +82,14 @@ export default function SignIn() {
                 gap: "8%",
               }}
             >
-              <GoogleSignIn />
-              <FacebookSignIn setIsLoading={setIsLoading} />
+              <GoogleSignIn
+                setIsLoading={setIsLoading}
+                setMessage={setMessage}
+              />
+              <FacebookSignIn
+                setIsLoading={setIsLoading}
+                setMessage={setMessage}
+              />
             </Box>
             <Typography>
               Don't have account?{" "}
