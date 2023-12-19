@@ -1,7 +1,9 @@
 import {
+  Backdrop,
   Box,
   Button,
   Card,
+  CircularProgress,
   Collapse,
   FormControl,
   IconButton,
@@ -19,6 +21,7 @@ interface User {
 }
 
 export default function Profile() {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [name, setName] = useState("");
   const [form, setForm] = useState(false);
   const [user, setUser] = useState<User>();
@@ -71,6 +74,7 @@ export default function Profile() {
       };
       const cookies = new Cookies(null, { path: "/" });
       const token = await cookies.get("access_token");
+      setIsLoading(true);
       const response = await fetch(
         `${process.env.REACT_APP_API_URL}/user/change-name`,
         {
@@ -82,7 +86,7 @@ export default function Profile() {
           body: JSON.stringify(body),
         }
       );
-
+      setIsLoading(false);
       if (response.ok) {
         setUser((prevUser: any) => ({
           ...prevUser,
@@ -104,6 +108,12 @@ export default function Profile() {
         boxSizing: "border-box",
       }}
     >
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={isLoading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
       <Card
         sx={{
           p: 2,

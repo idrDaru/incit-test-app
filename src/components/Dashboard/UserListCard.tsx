@@ -1,4 +1,10 @@
-import { Box, Card, Typography } from "@mui/material";
+import {
+  Box,
+  Card,
+  CircularProgress,
+  Collapse,
+  Typography,
+} from "@mui/material";
 import { useEffect, useState } from "react";
 import { Cookies } from "react-cookie";
 
@@ -13,6 +19,7 @@ interface User {
 }
 
 export default function UserListCard() {
+  const [isLoading, setIsLoading] = useState(false);
   const [userList, setUserList] = useState<User[]>([]);
 
   const parseDate = (isoDate: Date) => {
@@ -21,42 +28,34 @@ export default function UserListCard() {
     return date.toLocaleString();
   };
 
-  useEffect(() => {
-    const fetchUserList = async () => {
-      try {
-        const cookies = new Cookies(null, { path: "/" });
-        const token = await cookies.get("access_token");
-        const response = await fetch(
-          `${process.env.REACT_APP_API_URL}/user/list`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        if (response.ok) {
-          const userData = await response.json();
-          const users: User[] = userData.map((element: any) => ({
-            signUpDate: parseDate(element.signUpDate),
-            name: element.name,
-            session: {
-              loginCount: element.session.loginCount,
-              latestLogoutDate: parseDate(element.session.latestLogoutDate),
-              currentActiveSessionCount:
-                element.session.currentActiveSessionCount,
-            },
-          }));
-          setUserList(users);
-        } else {
-          // Handle HTTP error
-        }
-      } catch (error) {
-        // Handle fetch or other errors
-      }
-    };
+  const fetchUserList = async () => {
+    const cookies = new Cookies(null, { path: "/" });
+    const token = await cookies.get("access_token");
+    setIsLoading(true);
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/user/list`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (response.ok) {
+      const userData = await response.json();
+      const users: User[] = userData.map((element: any) => ({
+        signUpDate: parseDate(element.signUpDate),
+        name: element.name,
+        session: {
+          loginCount: element.session.loginCount,
+          latestLogoutDate: parseDate(element.session.latestLogoutDate),
+          currentActiveSessionCount: element.session.currentActiveSessionCount,
+        },
+      }));
+      setUserList(users);
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchUserList();
   }, []);
 
@@ -83,6 +82,9 @@ export default function UserListCard() {
           gap: "20px",
         }}
       >
+        <Collapse in={isLoading}>
+          <CircularProgress color="inherit" />
+        </Collapse>
         {userList.map((value, index) => (
           <Card key={index} sx={{ p: 2 }}>
             <Typography>
